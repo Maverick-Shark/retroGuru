@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raw Phase Shift Calculator</title>
+</head>
+<body>
+    <h1>Raw Phase Shift Calculator</h1>
+
+    <form id="shiftForm">
+        <label for="inputClock">Input Clock (MHz):</label>
+        <input type="number" id="inputClock" step="any" required><br><br>
+
+        <label for="currentShift">Current Shift (degrees):</label>
+        <input type="number" id="currentShift" step="any" required><br><br>
+
+        <label for="destinationClock">Destination Clock (MHz):</label>
+        <input type="number" id="destinationClock" step="any" required><br><br>
+
+        <button type="button" onclick="calculateRawShift()">Calculate Raw Shift</button>
+    </form>
+
+    <h2>Results:</h2>
+    <p id="rawShiftResult">Raw Phase Shift: </p>
+
+    <script>
+        // Function to calculate raw phase shift based on two clock frequencies
+        function calculateRawShift() {
+            let inputClock = parseFloat(document.getElementById('inputClock').value);
+            let currentShift = parseFloat(document.getElementById('currentShift').value);
+            let destinationClock = parseFloat(document.getElementById('destinationClock').value);
+
+            // Calculate the time shift at the input clock
+            let periodInputClock = 1 / (inputClock * 1e6); // Convert MHz to Hz
+            let timeShift = (currentShift / 360) * periodInputClock;
+
+            // Calculate the equivalent shift at the destination clock
+            let periodDestinationClock = 1 / (destinationClock * 1e6); // Convert MHz to Hz
+            let rawShift = (timeShift / periodDestinationClock) * 360;
+
+            // Display the result
+            document.getElementById('rawShiftResult').innerText = "Raw Phase Shift: " + rawShift.toFixed(2) + " degrees";
+        }
+    </script>
+</body>
+</html>

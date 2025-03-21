@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quartus PLL Frequency Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Quartus PLL Frequency Calculator</h2>
+        <div class="input-group">
+            <label for="inputClock">Input Clock (MHz):</label>
+            <input type="number" id="inputClock" placeholder="Enter input clock frequency in MHz">
+        </div>
+        <div class="input-group">
+            <label for="destinationClock">Destination Clock (MHz):</label>
+            <input type="number" id="destinationClock" placeholder="Enter destination clock frequency in MHz">
+        </div>
+        <button onclick="calculate()">Calculate Frequencies</button>
+
+        <div id="result" class="result" style="display: none;">
+            <p id="frequency1"></p>
+            <p id="frequency2"></p>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            const inputClockMHz = parseFloat(document.getElementById("inputClock").value);
+            const destinationClockMHz = parseFloat(document.getElementById("destinationClock").value);
+
+            if (isNaN(inputClockMHz) || isNaN(destinationClockMHz)) {
+                alert("Please enter valid numbers for both fields.");
+                return;
+            }
+
+            // Convert MHz to picoseconds (needed for Quartus PLL configuration)
+            const inputClockPeriodPs = (1 / inputClockMHz) * 1e6;
+            const destinationClockPeriodPs = (1 / destinationClockMHz) * 1e6;
+
+            // Display the results in picoseconds
+            document.getElementById("result").style.display = "block";
+            document.getElementById("frequency1").innerText = `Input Clock Period: ${inputClockPeriodPs.toFixed(2)} ps`;
+            document.getElementById("frequency2").innerText = `Destination Clock Period: ${destinationClockPeriodPs.toFixed(2)} ps`;
+        }
+    </script>
+
+</body>
+</html>

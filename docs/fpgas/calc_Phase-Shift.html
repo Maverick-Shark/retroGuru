@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raw Phase Shift Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        h2 {
+            text-align: center;
+        }
+        h3 {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 5px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .table-container {
+            max-width: 100%;
+            margin: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate; /* Important to allow rounded corners */
+            border-spacing: 0;
+            border: 1px solid #ccc; /* Outer border */
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border-right: 1px solid #ccc; /* Vertical separator */
+            border-bottom: 1px solid #ccc; /* Horizontal separator */
+        }
+        th {
+            background-color: #ddd;
+            font-weight: bold;
+        }
+        td.bold {
+            font-weight: bold;
+        }
+        /* Remove the last right border in each row */
+        tr th:last-child, tr td:last-child {
+            border-right: none;
+        }
+        /* Remove bottom border in last row */
+        tr:last-child td {
+            border-bottom: none;
+        }
+        /* Rounded Corners */
+        table tr:first-child th:first-child {
+            border-top-left-radius: 10px;
+        }
+        table tr:first-child th:last-child {
+            border-top-right-radius: 10px;
+        }
+        table tr:last-child td:first-child {
+            border-bottom-left-radius: 10px;
+        }
+        table tr:last-child td:last-child {
+            border-bottom-right-radius: 10px;
+        }
+        tr:first-child th:first-child, tr:first-child td:first-child {
+            border-radius: 5px 0 0 0;
+        }
+        tr:last-child th:first-child, tr:last-child td:first-child {
+            border-radius: 0 0 0 5px;
+        }
+        .bold {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <h2>Raw Phase Shift Calculator</h2>
+
+        <form id="shiftForm">
+
+	        <div class="input-group">
+                <label for="inputClock">Input Clock (MHz):</label>
+                <input type="number" id="inputClock" placeholder="Enter input clock frequency in MHz" step="any" required>
+            </div>
+
+            <div class="input-group">
+                <label for="currentShiftPs">Current Phase Shift (ps):</label>
+                <input type="number" id="currentShiftPs" placeholder="Enter current Phase Shift in ps" step="any" required>
+            </div>
+
+            <div class="input-group">
+                <label for="destinationClock">Destination Clock (MHz):</label>
+                <input type="number" id="destinationClock" placeholder="Enter destination clock frequency in MHz" step="any" required>
+            </div>
+
+            <div class="input-group">
+                <label for="divideBy">Divide By:</label>
+                <input type="number" id="divideBy" placeholder="Enter Divide By PLL component" step="1" required>
+            </div>
+
+            <div class="input-group">
+                <label for="multiplyBy">Multiply By:</label>
+                <input type="number" id="multiplyBy" placeholder="Enter Multiply By PLL component" step="1" required>
+            </div>
+
+            <!--
+            <div class="input-group">
+                <label for="dutyCycle">Duty Cycle (%):</label>
+                <input type="number" id="dutyCycle" placeholder="Enter Duty Cycle PLL component (50%)" step="any" required>
+            </div>
+            -->
+
+            <button type="button" onclick="calculateRawShift()">Calculate Raw Phase Shift</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;">
+            <h3>Summary Table</h3>
+            <!-- <p id="rawShiftResult"><strong>Raw Phase Shift: </strong></p> -->
+            <div id="summaryTable"></div>
+            <div id="rawPhaseShiftResult"></div>
+        </div>
+
+    </div>
+
+    <script>
+        function calculateRawShift() {
+            let inputClock = parseFloat(document.getElementById('inputClock').value);
+            let currentShiftPs = parseFloat(document.getElementById('currentShiftPs').value);
+            let destinationClock = parseFloat(document.getElementById('destinationClock').value);
+            let multiplyBy = parseInt(document.getElementById('multiplyBy').value);
+            let divideBy = parseInt(document.getElementById('divideBy').value);
+            //let dutyCycle = parseFloat(document.getElementById('dutyCycle').value); // Not used but captured
+
+            // Step 1: Calculate Output Frequency (MHz)
+            let outputFreqInput = (inputClock * multiplyBy) / divideBy;
+            let outputPeriodInputPs = (1 / outputFreqInput) * 1e6; // Period in ps
+
+            // Step 2: Convert current shift ps -> phase degrees
+            let phaseDegreesInput = (currentShiftPs / outputPeriodInputPs) * 360;
+
+            // Step 3: Calculate destination output frequency
+            let outputFreqDest = (destinationClock * multiplyBy) / divideBy;
+            let outputPeriodDestPs = (1 / outputFreqDest) * 1e6; // Period in ps
+
+            // Step 4: Convert back phase degrees -> ps at destination clock
+            let newShiftPs = (phaseDegreesInput / 360) * outputPeriodDestPs;
+
+            // Step 5: Calculate destination phase degrees
+            let phaseDegreesDest = (newShiftPs / outputPeriodDestPs) * 360;
+
+            // Step 7: Create summary table
+            let tableHTML = `
+                <table>
+                    <tr>
+                        <th>FPGA Clock (MHz)</th>
+                        <th>Output Clock (MHz)</th>
+                        <th>Phase Shift (ps)</th>
+                        <th>Phase Shift (°)</th>
+                    </tr>
+                    <tr>
+                        <td>${inputClock}</td>
+                        <td>${outputFreqInput.toFixed(3)}</td>
+                        <td>${currentShiftPs.toFixed(2)}</td>
+                        <td>${phaseDegreesInput.toFixed(2)}</td>
+                    </tr>
+                    <tr>
+                        <td>${destinationClock}</td>
+                        <td>${outputFreqDest.toFixed(3)}</td>
+                        <td class="bold">${newShiftPs.toFixed(2)}</td>
+                        <td>${phaseDegreesDest.toFixed(2)}</td>
+                    </tr>
+                </table>
+                <p>Raw Phase Shift: <strong>${newShiftPs.toFixed(2)} ps</strong></p>            `;
+
+            // Display result
+            document.getElementById("result").style.display = "block";
+            //document.getElementById('rawShiftResult').innerText = `Raw Phase Shift: ${newShiftPs.toFixed(2)} ps`;
+            document.getElementById('summaryTable').innerHTML = tableHTML;
+	
+        }
+    </script>
+</body>
+</html>
